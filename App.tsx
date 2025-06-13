@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect, createContext, useContext, useCallback, useMemo } from 'react';
 import { APP_TITLE, TAB_OPTIONS, INITIAL_BUYERS, INITIAL_STATUSES, INITIAL_REGIONS, INITIAL_COUNTRIES, INITIAL_SOURCING_MANAGERS_PL, INITIAL_REASONS, FIRESTORE_COLLECTIONS, COLOR_PALETTE } from './constants';
 import { Ticket, Buyer, Status, DropdownOption, DropdownListType } from './types';
 import * as firebaseService from './services/firebaseService';
-import DashboardPage from './pages/DashboardPage';
-import SettingsPage from './pages/SettingsPage';
-import ReportsPage from './pages/ReportsPage';
-import BinPage from './pages/BinPage'; // Import the new BinPage
+// RIGHE CANCELLATE - NON CI SERVONO PIÙ
+// import DashboardPage from './pages/DashboardPage';
+// import SettingsPage from './pages/SettingsPage';
+// import ReportsPage from './pages/ReportsPage';
+// import BinPage from './pages/BinPage'; 
 
 interface AppContextType {
   tickets: Ticket[];
@@ -34,6 +34,14 @@ export const useAppContext = (): AppContextType => {
   }
   return context;
 };
+
+// PAGINE TEMPORANEE - CI SERVONO PER NON DARE ERRORE
+const PaginaTemporanea = ({ nomePagina }: { nomePagina: string }) => (
+  <div className="p-8 text-center">
+    <h2 className="text-2xl font-bold">{nomePagina}</h2>
+    <p className="mt-2 text-gray-600">Questa sezione è in costruzione.</p>
+  </div>
+);
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>(TAB_OPTIONS[0]);
@@ -143,17 +151,18 @@ const App: React.FC = () => {
     if (error) {
        return <div className="p-8 text-center text-red-500 bg-red-100 border border-red-500 rounded-md">{error}</div>;
     }
+    // CODICE MODIFICATO - USIAMO LE PAGINE TEMPORANEE
     switch (activeTab) {
       case 'Dashboard':
-        return <DashboardPage />;
+        return <PaginaTemporanea nomePagina="Dashboard" />;
       case 'Settings':
-        return <SettingsPage />;
+        return <PaginaTemporanea nomePagina="Settings" />;
       case 'Reports':
-        return <ReportsPage />;
+        return <PaginaTemporanea nomePagina="Reports" />;
       case 'Bin':
-        return <BinPage />; // Render BinPage
+        return <PaginaTemporanea nomePagina="Bin" />;
       default:
-        return <DashboardPage />;
+        return <PaginaTemporanea nomePagina="Dashboard" />;
     }
   };
 
