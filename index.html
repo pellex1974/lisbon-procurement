@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lisbon Procurement Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'primary-action': '#4CAF50', // Green
+            'specific-action': '#FF9800', // Orange
+            'missing-item': '#FF9800',
+            'pending-item': '#FFC107', // Yellow
+            'parked-item': '#FFC107',
+            'presentation-report': '#FFEB3B',
+            'negative-action': '#F44336', // Red
+            'rejected-item': '#F44336',
+            'cancelled-item': '#F44336',
+            'neutral-border': '#9E9E9E', // Gray
+            'neutral-bg': '#F5F5F5',
+            'secondary-button-text': '#212121',
+          }
+        }
+      }
+    }
+  </script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "recharts": "https://esm.sh/recharts@^2.15.3",
+    "jspdf": "https://esm.sh/jspdf@^2.5.1",
+    "jspdf-autotable": "https://esm.sh/jspdf-autotable@^5.0.2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
