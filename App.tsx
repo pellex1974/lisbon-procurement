@@ -1,12 +1,24 @@
 import React, { useState, useEffect, createContext, useContext, useCallback, useMemo } from 'react';
 import { APP_TITLE, TAB_OPTIONS, INITIAL_BUYERS, INITIAL_STATUSES, INITIAL_REGIONS, INITIAL_COUNTRIES, INITIAL_SOURCING_MANAGERS_PL, INITIAL_REASONS, FIRESTORE_COLLECTIONS, COLOR_PALETTE } from './constants';
 import { Ticket, Buyer, Status, DropdownOption, DropdownListType } from './types';
-import * as firebaseService from './services/firebaseService';
-// RIGHE CANCELLATE - NON CI SERVONO PIÙ
-// import DashboardPage from './pages/DashboardPage';
-// import SettingsPage from './pages/SettingsPage';
-// import ReportsPage from './pages/ReportsPage';
-// import BinPage from './pages/BinPage'; 
+// import * as firebaseService from './services/firebaseService'; // CANCELLATO - CAUSAVA ERRORE
+
+// --- INIZIO BLOCCO TEMPORANEO ---
+// Siccome non possiamo parlare con il database, creiamo dei dati finti.
+const datiFinti = {
+  tickets: [
+    { id: 'T1', prNumber: 'PR001', poNumber: 'PO101', buyerId: 'B1', statusId: 'S1', region: 'Europe', country: 'Portugal', sourcingManager: 'SM1', rejectionReason: '', lastUpdate: new Date().toISOString(), isDeleted: false },
+    { id: 'T2', prNumber: 'PR002', poNumber: 'PO102', buyerId: 'B2', statusId: 'S2', region: 'Europe', country: 'Spain', sourcingManager: 'SM2', rejectionReason: '', lastUpdate: new Date().toISOString(), isDeleted: false },
+  ],
+  buyers: INITIAL_BUYERS,
+  statuses: INITIAL_STATUSES,
+  regions: INITIAL_REGIONS,
+  countries: INITIAL_COUNTRIES,
+  sourcingManagersPL: INITIAL_SOURCING_MANAGERS_PL,
+  reasons: INITIAL_REASONS,
+};
+// --- FINE BLOCCO TEMPORANEO ---
+
 
 interface AppContextType {
   tickets: Ticket[];
@@ -16,7 +28,7 @@ interface AppContextType {
   countries: DropdownOption[];
   sourcingManagersPL: DropdownOption[];
   reasons: DropdownOption[];
-  fetchTickets: () => Promise<void>; // Fetches active tickets
+  fetchTickets: () => Promise<void>; 
   fetchBuyers: () => Promise<void>;
   fetchStatuses: () => Promise<void>;
   fetchDropdownOptions: (listType: DropdownListType) => Promise<void>;
@@ -35,17 +47,16 @@ export const useAppContext = (): AppContextType => {
   return context;
 };
 
-// PAGINE TEMPORANEE - CI SERVONO PER NON DARE ERRORE
 const PaginaTemporanea = ({ nomePagina }: { nomePagina: string }) => (
   <div className="p-8 text-center">
     <h2 className="text-2xl font-bold">{nomePagina}</h2>
-    <p className="mt-2 text-gray-600">Questa sezione è in costruzione.</p>
+    <p className="mt-2 text-gray-600">Questa sezione è in costruzione. I dati mostrati sono solo un esempio.</p>
   </div>
 );
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<string>(TAB_OPTIONS[0]);
-  const [tickets, setTickets] = useState<Ticket[]>([]); // Active tickets
+  const [tickets, setTickets] = useState<Ticket[]>([]); 
   const [buyers, setBuyers] = useState<Buyer[]>(INITIAL_BUYERS);
   const [statuses, setStatuses] = useState<Status[]>(INITIAL_STATUSES);
   const [regions, setRegions] = useState<DropdownOption[]>(INITIAL_REGIONS);
@@ -55,75 +66,36 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(async (fetchFn: () => Promise<any>, setDataFn: (data: any) => void, dataKey?: string) => {
-    try {
-      const data = await fetchFn();
-      setDataFn(data);
-      if (dataKey) console.log(`Fetched ${dataKey}:`, data);
-    } catch (err) {
-      console.error(`Error fetching ${dataKey || 'data'}:`, err);
-      setError(`Failed to load ${dataKey || 'data'}. Please try again later.`);
-      if(dataKey === 'tickets') setDataFn([]);
-    }
-  }, []);
-
-  const fetchTickets = useCallback(async () => { // Fetches active (non-deleted) tickets
-    await fetchData(firebaseService.getTickets, setTickets, 'tickets');
-  }, [fetchData]);
-  
-  const fetchBuyers = useCallback(async () => {
-    await fetchData(() => firebaseService.getItems<Buyer>(FIRESTORE_COLLECTIONS.BUYERS, INITIAL_BUYERS), setBuyers, 'buyers');
-  }, [fetchData]);
-
-  const fetchStatuses = useCallback(async () => {
-     await fetchData(() => firebaseService.getItems<Status>(FIRESTORE_COLLECTIONS.STATUSES, INITIAL_STATUSES), setStatuses, 'statuses');
-  }, [fetchData]);
-
+  // --- INIZIO BLOCCO MODIFICATO ---
+  // Abbiamo rimosso le chiamate al database e usiamo i dati finti.
+  const fetchTickets = useCallback(async () => { setTickets(datiFinti.tickets); }, []);
+  const fetchBuyers = useCallback(async () => { setBuyers(datiFinti.buyers); }, []);
+  const fetchStatuses = useCallback(async () => { setStatuses(datiFinti.statuses); }, []);
   const fetchDropdownOptions = useCallback(async (listType: DropdownListType) => {
-    let initialData: DropdownOption[] = [];
-    let setDataFn: (data: DropdownOption[]) => void;
-    
-    switch(listType) {
-      case DropdownListType.Regions: 
-        initialData = INITIAL_REGIONS; setDataFn = setRegions; break;
-      case DropdownListType.Countries: 
-        initialData = INITIAL_COUNTRIES; setDataFn = setCountries; break;
-      case DropdownListType.SourcingManagersPL: 
-        initialData = INITIAL_SOURCING_MANAGERS_PL; setDataFn = setSourcingManagersPL; break;
-      case DropdownListType.Reasons: 
-        initialData = INITIAL_REASONS; setDataFn = setReasons; break;
-      default: return;
-    }
-    await fetchData(() => firebaseService.getDropdownOptions(listType)
-        .then(data => data.length > 0 ? data : initialData) 
-        .catch(() => initialData), 
-    setDataFn, listType);
-  }, [fetchData]);
-
+    if (listType === DropdownListType.Regions) setRegions(datiFinti.regions);
+    if (listType === DropdownListType.Countries) setCountries(datiFinti.countries);
+    if (listType === DropdownListType.SourcingManagersPL) setSourcingManagersPL(datiFinti.sourcingManagersPL);
+    if (listType === DropdownListType.Reasons) setReasons(datiFinti.reasons);
+  }, []);
+  // --- FINE BLOCCO MODIFICATO ---
 
   useEffect(() => {
     const loadAllData = async () => {
       setIsLoading(true);
       setError(null);
-      try {
-        await Promise.all([
-          fetchTickets(),
-          fetchBuyers(),
-          fetchStatuses(),
-          fetchDropdownOptions(DropdownListType.Regions),
-          fetchDropdownOptions(DropdownListType.Countries),
-          fetchDropdownOptions(DropdownListType.SourcingManagersPL),
-          fetchDropdownOptions(DropdownListType.Reasons),
-        ]);
-      } catch (err) {
-        // Error already handled
-      } finally {
-        setIsLoading(false);
-      }
+      await Promise.all([
+        fetchTickets(),
+        fetchBuyers(),
+        fetchStatuses(),
+        fetchDropdownOptions(DropdownListType.Regions),
+        fetchDropdownOptions(DropdownListType.Countries),
+        fetchDropdownOptions(DropdownListType.SourcingManagersPL),
+        fetchDropdownOptions(DropdownListType.Reasons),
+      ]);
+      setIsLoading(false);
     };
     loadAllData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); 
+  }, [fetchTickets, fetchBuyers, fetchStatuses, fetchDropdownOptions]); 
 
   const getBuyerName = useCallback((buyerId: string): string => {
     const buyer = buyers.find(b => b.id === buyerId);
@@ -151,7 +123,6 @@ const App: React.FC = () => {
     if (error) {
        return <div className="p-8 text-center text-red-500 bg-red-100 border border-red-500 rounded-md">{error}</div>;
     }
-    // CODICE MODIFICATO - USIAMO LE PAGINE TEMPORANEE
     switch (activeTab) {
       case 'Dashboard':
         return <PaginaTemporanea nomePagina="Dashboard" />;
@@ -180,7 +151,6 @@ const App: React.FC = () => {
                 let tabStyle = 'text-gray-600 hover:text-gray-800 hover:bg-gray-200';
                 if (isActive) {
                   if (tab === 'Bin') {
-                    // Use Tailwind classes for red color defined in tailwind.config
                     tabStyle = `border-b-2 border-rejected-item text-rejected-item`; 
                   } else {
                     tabStyle = 'border-b-2 border-primary-action text-primary-action';
